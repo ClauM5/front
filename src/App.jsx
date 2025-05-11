@@ -1,26 +1,46 @@
-
 import React, { useEffect, useState } from "react";
 
-function App() {
-  const [products, setProducts] = useState([]);
+const App = () => {
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Efeito para carregar os dados da API quando o componente for montado
   useEffect(() => {
-    fetch(import.meta.env.VITE_API_URL + "/produtos")
-      .then((res) => res.json())
-      .then(setProducts)
-      .catch(console.error);
-  }, []);
+    const fetchProdutos = async () => {
+      try {
+        const response = await fetch('https://hortifruti-backend.onrender.com/api/produtos');
+        if (response.ok) {
+          const data = await response.json();
+          setProdutos(data);  // Atualizando o estado com os dados dos produtos
+        } else {
+          console.error('Erro ao carregar produtos:', response.status);
+        }
+      } catch (error) {
+        console.error('Erro de rede:', error);
+      } finally {
+        setLoading(false);  // Finaliza o carregamento
+      }
+    };
+
+    fetchProdutos();
+  }, []); // O efeito executa apenas uma vez quando o componente é montado
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h1>Hortifruti</h1>
-      <ul>
-        {products.map((item) => (
-          <li key={item.id}>{item.nome} - R$ {item.preco}</li>
-        ))}
-      </ul>
+    <div>
+      {loading ? (
+        <p>Carregando...</p>
+      ) : (
+        <ul>
+          {produtos.map((produto) => (
+            <li key={produto.id}>
+              {produto.nome} - R${produto.preco.toFixed(2)}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};
 
 export default App;
+
